@@ -16,12 +16,12 @@ body {
   display: grid;
   grid-template-columns: 300px minmax(420px, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 22px 28px;
+  gap: 14px 24px;
   width: min(980px, calc(100% - 32px));
   height: 100vh;
   max-height: 100vh;
   margin: 0 auto;
-  padding: 24px 0;
+  padding: 14px 0;
   overflow: hidden;
 }
 
@@ -31,16 +31,16 @@ body {
 
 .page-title {
   margin: 0;
-  font-size: 30px;
+  font-size: 27px;
   line-height: 1.2;
   letter-spacing: 0;
   color: #123629;
 }
 
 .page-subtitle {
-  margin: 8px 0 0;
-  font-size: 16px;
-  line-height: 1.4;
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.3;
   color: #526173;
 }
 
@@ -56,8 +56,8 @@ body {
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px;
+  gap: 7px;
+  padding: 14px;
   overflow-y: auto;
 }
 
@@ -78,13 +78,13 @@ body {
 }
 
 .controls input {
-  height: 40px;
-  padding: 0 12px;
+  height: 34px;
+  padding: 0 10px;
 }
 
 .controls textarea {
-  height: 86px;
-  padding: 10px 12px;
+  height: 68px;
+  padding: 8px 10px;
   resize: none;
   line-height: 1.4;
 }
@@ -118,7 +118,7 @@ body {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 12px;
+  padding: 0 10px;
   border-left: 1px solid #e2e8f0;
   font-size: 14px;
   font-weight: 700;
@@ -127,9 +127,9 @@ body {
 }
 
 .controls button {
-  height: 42px;
+  height: 36px;
   border: 0;
-  padding: 0 14px;
+  padding: 0 12px;
   font-weight: 700;
   color: #ffffff;
   background: #1f8f5f;
@@ -140,7 +140,7 @@ body {
 .controls button:nth-of-type(2),
 .controls button:nth-of-type(3),
 .controls button:nth-of-type(4) {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .controls button:hover {
@@ -166,7 +166,7 @@ body {
 }
 
 .response-label {
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-bottom: 1px solid #1f2937;
   font-size: 16px;
   font-weight: 700;
@@ -179,7 +179,7 @@ body {
   height: 100%;
   min-height: 0;
   border: 0;
-  padding: 18px;
+  padding: 14px;
   overflow: auto;
   resize: none;
   font-family: Consolas, "Courier New", monospace;
@@ -205,7 +205,7 @@ body {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto minmax(0, 1fr);
     width: min(100% - 24px, 980px);
-    padding: 20px 0;
+    padding: 12px 0;
     overflow-y: auto;
   }
 
