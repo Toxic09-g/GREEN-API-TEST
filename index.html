@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GREEN-API Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1 class="page-title">GREEN-API-TEST</h1>
+      <p class="page-subtitle">Тестовое задание на должность “DevOps-Инженер”</p>
+    </header>
+
+    <section class="controls" aria-label="Команды GREEN-API">
+      <input
+        id="idInstance"
+        type="text"
+        placeholder="idInstance"
+        autocomplete="off"
+        required
+      >
+      <input
+        id="apiTokenInstance"
+        type="password"
+        placeholder="ApiTokenInstance"
+        autocomplete="off"
+        required
+      >
+
+      <button id="getSettingsButton" type="button">getSettings</button>
+      <button id="getStateInstanceButton" type="button">getStateInstance</button>
+
+      <div class="chat-id-field">
+        <input
+          id="messageChatId"
+          type="tel"
+          placeholder="77771234567"
+          autocomplete="off"
+          required
+        >
+        <span>@c.us</span>
+      </div>
+      <textarea
+        id="messageText"
+        placeholder="Hello World!"
+        required
+      ></textarea>
+      <button id="sendMessageButton" type="button">sendMessage</button>
+
+      <div class="chat-id-field">
+        <input
+          id="fileChatId"
+          type="tel"
+          placeholder="77771234567"
+          autocomplete="off"
+          required
+        >
+        <span>@c.us</span>
+      </div>
+      <input
+        id="fileUrl"
+        type="url"
+        placeholder="https://my.site.com/img/horse.png"
+        autocomplete="off"
+        required
+      >
+      <button id="sendFileByUrlButton" type="button">sendFileByUrl</button>
+    </section>
+
+    <section class="response" aria-labelledby="responseLabel">
+      <label class="response-label" id="responseLabel" for="responseOutput">Ответ:</label>
+      <textarea
+        id="responseOutput"
+        class="response-output"
+        readonly
+        placeholder="> Здесь появится ответ GREEN-API"
+      ></textarea>
+    </section>
+  </main>
+
+  <script>
+    // Базовый адрес API, к которому будут отправляться все обычные запросы.
+    const API_URL = 'https://7107.api.greenapi.com';
+
+    // Поле с идентификатором инстанса GREEN-API.
+    const idInstanceInput = document.querySelector('#idInstance');
+
+    // Поле с токеном доступа к инстансу GREEN-API.
+    const apiTokenInstanceInput = document.querySelector('#apiTokenInstance');
+
+    // Поле с номером получателя для отправки обычного сообщения.
+    const messageChatIdInput = document.querySelector('#messageChatId');
+
+    // Поле с текстом сообщения.
+    const messageTextInput = document.querySelector('#messageText');
+
+    // Поле с номером получателя для отправки файла по ссылке.
+    const fileChatIdInput = document.querySelector('#fileChatId');
+
+    // Поле со ссылкой на файл, который нужно отправить.
+    const fileUrlInput = document.querySelector('#fileUrl');
+
+    // Консоль справа, куда выводится ответ от GREEN-API.
+    const responseOutput = document.querySelector('#responseOutput');
+
+    // Все кнопки на странице, чтобы можно было отключать их во время запроса.
+    const buttons = document.querySelectorAll('button');
+
+    // Выводит ответ в консоль: строку показывает как сообщение, объект форматирует как JSON.
+    function printResponse(value) {
+      // Если пришла обычная строка, добавляем знак консоли и выводим ее как есть.
+      if (typeof value === 'string') {
+        responseOutput.value = `> ${value}`;
+        return;
+      }
+
+      // Если пришел объект, красиво форматируем его с отступами.
+      responseOutput.value = JSON.stringify(value, null, 4);
+    }
+
+    // Проверяет и возвращает idInstance и apiTokenInstance.
+    function getCredentials() {
+      // reportValidity показывает стандартную браузерную ошибку, если поле пустое.
+      if (!idInstanceInput.reportValidity() || !apiTokenInstanceInput.reportValidity()) {
+        return null;
+      }
+
+      // trim убирает случайные пробелы в начале и конце введенных значений.
+      return {
+        idInstance: idInstanceInput.value.trim(),
+        apiTokenInstance: apiTokenInstanceInput.value.trim()
+      };
+    }
+
+    // Собирает полный URL метода GREEN-API.
+    function buildUrl(methodName) {
+      // Получаем данные подключения из верхних полей.
+      const credentials = getCredentials();
+
+      // Если данные не заполнены, URL не создаем.
+      if (!credentials) {
+        return null;
+      }
+
+      // Формат ссылки соответствует документации GREEN-API.
+      return `${API_URL}/waInstance${credentials.idInstance}/${methodName}/${credentials.apiTokenInstance}`;
+    }
+
+    // Включает или отключает состояние загрузки для всех кнопок.
+    function setLoading(isLoading) {
+      // Пока идет запрос, кнопки блокируются, чтобы не отправлять несколько запросов сразу.
+      buttons.forEach((button) => {
+        button.disabled = isLoading;
+      });
+    }
+
+    // Универсальная функция для отправки запросов в GREEN-API.
+    async function requestGreenApi(methodName, options = {}) {
+      // Создаем URL для конкретного метода, например getSettings или sendMessage.
+      const url = buildUrl(methodName);
+
+      // Если URL не создался из-за пустых полей, останавливаем выполнение.
+      if (!url) {
+        return;
+      }
+
+      // Показываем состояние загрузки перед началом запроса.
+      setLoading(true);
+      printResponse('Выполняется запрос...');
+
+      try {
+        // Отправляем HTTP-запрос через fetch.
+        const response = await fetch(url, options);
+
+        // Читаем ответ как текст, чтобы обработать и JSON, и обычную строку.
+        const text = await response.text();
+
+        // Если сервер ничего не вернул, показываем понятное сообщение.
+        if (!text) {
+          printResponse('Пустой ответ');
+          return;
+        }
+
+        try {
+          // Пробуем распарсить ответ как JSON.
+          printResponse(JSON.parse(text));
+        } catch (error) {
+          // Если ответ не JSON, выводим его как обычный текст.
+          printResponse(text);
+        }
+      } catch (error) {
+        // Если запрос не выполнился, выводим ошибку в консоль.
+        printResponse({
+          error: 'Не удалось выполнить запрос',
+          message: error.message
+        });
+      } finally {
+        // После завершения запроса возвращаем кнопки в активное состояние.
+        setLoading(false);
+      }
+    }
+
+    // Собирает chatId: пользователь вводит только номер, а @c.us добавляется автоматически.
+    function getChatId(input) {
+      // Если пользователь случайно ввел @c.us сам, сначала убираем его, потом добавляем один раз.
+      return input.value.trim().replace(/@c\.us$/i, '') + '@c.us';
+    }
+
+    // Получает имя файла из ссылки для метода sendFileByUrl.
+    function getFileNameFromUrl(url) {
+      try {
+        // URL разбирает ссылку на части, pathname содержит путь до файла.
+        const pathname = new URL(url).pathname;
+
+        // Берем последнюю часть пути как имя файла.
+        const fileName = pathname.split('/').filter(Boolean).pop();
+
+        // Если имя файла не получилось найти, используем запасное имя.
+        return fileName || 'file';
+      } catch (error) {
+        // Если ссылка некорректная, возвращаем запасное имя файла.
+        return 'file';
+      }
+    }
+
+    // Отправляет POST-запросы с JSON-телом.
+    function sendJson(methodName, body) {
+      // Универсальная функция requestGreenApi получает метод и настройки fetch.
+      requestGreenApi(methodName, {
+        method: 'POST',
+        headers: {
+          // Сообщаем серверу, что отправляем JSON.
+          'Content-Type': 'application/json'
+        },
+        // Превращаем JavaScript-объект в JSON-строку.
+        body: JSON.stringify(body)
+      });
+    }
+
+    // Обработчик кнопки getSettings.
+    document.querySelector('#getSettingsButton').addEventListener('click', () => {
+      // getSettings отправляется GET-запросом без тела.
+      requestGreenApi('getSettings', {
+        method: 'GET'
+      });
+    });
+
+    // Обработчик кнопки getStateInstance.
+    document.querySelector('#getStateInstanceButton').addEventListener('click', () => {
+      // getStateInstance проверяет состояние инстанса.
+      requestGreenApi('getStateInstance', {
+        method: 'GET'
+      });
+    });
+
+    // Обработчик кнопки sendMessage.
+    document.querySelector('#sendMessageButton').addEventListener('click', () => {
+      // Проверяем, что номер получателя и текст сообщения заполнены.
+      if (!messageChatIdInput.reportValidity() || !messageTextInput.reportValidity()) {
+        return;
+      }
+
+      // Отправляем сообщение в GREEN-API.
+      sendJson('sendMessage', {
+        chatId: getChatId(messageChatIdInput),
+        message: messageTextInput.value.trim()
+      });
+    });
+
+    // Обработчик кнопки sendFileByUrl.
+    document.querySelector('#sendFileByUrlButton').addEventListener('click', () => {
+      // Проверяем, что номер получателя и ссылка на файл заполнены.
+      if (!fileChatIdInput.reportValidity() || !fileUrlInput.reportValidity()) {
+        return;
+      }
+
+      // Берем ссылку на файл из поля ввода.
+      const urlFile = fileUrlInput.value.trim();
+
+      // Отправляем файл по ссылке через GREEN-API.
+      sendJson('sendFileByUrl', {
+        chatId: getChatId(fileChatIdInput),
+        urlFile,
+        fileName: getFileNameFromUrl(urlFile)
+      });
+    });
+  </script>
+</body>
+</html>
